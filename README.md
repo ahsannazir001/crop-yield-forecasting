@@ -4,26 +4,47 @@
 
 This project develops a machine learning pipeline to predict crop yield using agricultural features such as soil type, rainfall, temperature, and fertilizer usage.
 
-The project uses a synthetic dataset to develop and evaluate a baseline regression model. It demonstrates data validation, feature preprocessing, model training, cross-validation, performance evaluation, and feature importance analysis.
+The project is organized into two main tasks:
 
-**Current stage:** Task 2 — Feature Engineering and Baseline Model Training.
+- **Task 1 — Synthetic Dataset Generation:** Generate a synthetic agricultural dataset for model development and experimentation.
+- **Task 2 — Feature Engineering and Baseline Model Training:** Preprocess the dataset, train a Random Forest regression model, evaluate its performance, and save the trained model and evaluation reports.
 
-## 2. Objectives
+The current implementation focuses on dataset generation and baseline model training. A production-ready alert system has not yet been implemented.
 
-- Generate and validate agricultural data.
+**Current Stage:** Task 1 completed; Task 2 baseline model training and evaluation completed.
+
+## 2. Project Objectives
+
+- Generate a synthetic agricultural dataset.
+- Validate the dataset before model training.
 - Prepare numerical and categorical features for machine learning.
 - Train a Random Forest regression model.
-- Evaluate the model using cross-validation and a held-out test set.
+- Evaluate the model using five-fold cross-validation and a held-out test set.
 - Analyze feature importance.
-- Save the trained model and evaluation results for future integration.
+- Save the trained model and evaluation results.
+- Prepare the project for future prediction API and alert system integration.
 
-## 3. Dataset
+## 3. Task 1 — Synthetic Dataset Generation
 
-Dataset file:
+### Objective
+
+The first task focuses on generating a synthetic agricultural dataset containing field information and crop yield measurements. This dataset provides the input required for the subsequent machine learning task.
+
+### Data Generation Script
+
+The dataset generation script is located at:
+
+`src/generate_data.py`
+
+### Generated Dataset
+
+The generated dataset is saved at:
 
 `data/synthetic_crop_yield.csv`
 
-The dataset contains 1,000 records and six columns.
+The dataset contains **1,000 records and six columns**.
+
+### Dataset Schema
 
 | Column | Description | Role |
 |---|---|---|
@@ -34,20 +55,69 @@ The dataset contains 1,000 records and six columns.
 | `fertilizer` | Fertilizer measurement | Input feature |
 | `yield` | Crop yield target | Target variable |
 
-The dataset contains synthetic data generated for development and experimentation.
+### Generate the Dataset
 
-**Important limitation:** Synthetic data does not fully represent real agricultural conditions. Model performance on this dataset should not be interpreted as validated real-world farming performance.
+Run the following command from the project root:
 
-## 4. Technology Stack
+```powershell
+python src/generate_data.py
+```
 
-- Python
+This runs the data generation script and creates the dataset used in Task 2.
+
+If the dataset already exists and you do not need to regenerate it, you can proceed directly to model training.
+
+### Task 1 Output
+
+- **Script:** `src/generate_data.py`
+- **Dataset:** `data/synthetic_crop_yield.csv`
+- **Records:** 1,000
+- **Columns:** 6
+
+### Dataset Limitation
+
+The dataset contains synthetic data generated for development and experimentation. It may not fully represent real agricultural conditions. Therefore, the model's performance must not be interpreted as verified real-world farming accuracy.
+
+## 4. Task 2 — Feature Engineering and Baseline Model Training
+
+### Objective
+
+Task 2 uses the dataset generated in Task 1 to build and evaluate a machine learning model for crop yield prediction.
+
+### Training Script
+
+The training script is located at:
+
+`src/train_model.py`
+
+### Model and Preprocessing Pipeline
+
+The project uses a `RandomForestRegressor` with 200 trees.
+
+The preprocessing and training pipeline includes:
+
+- **Numerical features:** Rainfall, temperature, and fertilizer.
+- **Missing numerical values:** Handled using median imputation.
+- **Numerical scaling:** Applied using `StandardScaler`.
+- **Categorical feature:** Soil type.
+- **Missing categorical values:** Handled using most-frequent imputation.
+- **Categorical encoding:** Applied using one-hot encoding.
+- **Train/test split:** 80% training data and 20% test data.
+- **Random seed:** 42 for reproducibility.
+- **Cross-validation:** Five-fold cross-validation on the training split.
+
+The trained pipeline includes both preprocessing and the regression model so that the same transformations can be applied during future predictions.
+
+## 5. Technology Stack
+
+- Python 3.10
 - Pandas
 - NumPy
 - Scikit-learn
 - Matplotlib
 - Joblib
 
-## 5. Project Structure
+## 6. Project Structure
 
 ```text
 crop-yield-forecasting-and-alert-system-for-greenfield-farmers/
@@ -69,53 +139,66 @@ crop-yield-forecasting-and-alert-system-for-greenfield-farmers/
 
 The `Task/` directory contains private task documents and should remain excluded from the public repository.
 
-## 6. Environment Setup
+## 7. Environment Setup
 
 Python 3.10 or another compatible Python version is recommended.
 
-Create a virtual environment:
+### Create a Virtual Environment
+
+Run the following command from the project root:
 
 ```powershell
 python -m venv .venv
 ```
 
-Activate it in Windows PowerShell:
+### Activate the Environment
+
+In Windows PowerShell:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install the project dependencies:
+### Install Dependencies
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-## 7. Train the Model
+## 8. Running the Project
 
-Run the training script from the project root:
+Run the tasks in the following order when starting with a fresh dataset.
+
+### Step 1: Generate the Dataset
+
+```powershell
+python src/generate_data.py
+```
+
+This runs Task 1 and generates the synthetic agricultural dataset.
+
+### Step 2: Train and Evaluate the Model
 
 ```powershell
 python src/train_model.py
 ```
 
-The script performs the following operations:
+This runs Task 2 and performs the following operations:
 
 1. Loads and validates the dataset.
-2. Separates input features from the target variable.
-3. Applies numerical preprocessing and one-hot encoding to soil categories.
-4. Splits the dataset into training and testing sets.
-5. Evaluates the training split using five-fold cross-validation.
-6. Trains a Random Forest regression pipeline.
-7. Calculates test-set MAE and R².
-8. Generates a feature importance chart.
-9. Saves the trained pipeline and evaluation metrics.
+2. Separates the input features from the target variable.
+3. Preprocesses numerical features.
+4. Encodes categorical soil types.
+5. Splits the dataset into training and testing sets.
+6. Performs five-fold cross-validation on the training data.
+7. Trains the Random Forest regression pipeline.
+8. Evaluates the model on the held-out test set.
+9. Generates a feature importance chart.
+10. Saves the trained model and evaluation metrics.
 
-The experiment uses an 80/20 train/test split and a fixed random seed of 42 for reproducibility.
+## 9. Model Evaluation
 
-## 8. Model Evaluation
-
-The current baseline model uses `RandomForestRegressor` with 200 trees.
+The current baseline model was evaluated using five-fold cross-validation and a separate held-out test set.
 
 ### Cross-Validation Results
 
@@ -134,37 +217,52 @@ The current baseline model uses `RandomForestRegressor` with 200 trees.
 
 The target values are interpreted in tonnes per hectare, as assumed by the project.
 
-**MAE (Mean Absolute Error)** measures the average absolute difference between predicted and actual yield values. Lower values indicate smaller errors on the evaluated dataset.
+### Evaluation Metrics
+
+**Mean Absolute Error (MAE)** measures the average absolute difference between predicted and actual crop yield values. Lower values indicate smaller prediction errors.
 
 **R² (Coefficient of Determination)** measures model performance relative to a mean-prediction baseline. Its interpretation depends on the dataset and evaluation setup.
 
-These results describe performance on the current synthetic dataset only.
+These results describe the model's performance on the current synthetic dataset only.
 
-## 9. Feature Importance
+## 10. Feature Importance
 
 The model generates a feature importance chart at:
 
 `reports/feature_importance.png`
 
-The current model ranks rainfall, loamy soil, and temperature among its most important features.
+The current model's leading feature importance values are:
 
-Feature importance describes how the fitted Random Forest uses features internally. It does not establish causal relationships between agricultural inputs and crop yield.
+| Feature | Importance |
+|---|---:|
+| Rainfall | 0.3665 |
+| Loamy soil | 0.3016 |
+| Temperature | 0.2220 |
+| Fertilizer | 0.0747 |
+| Clay soil | 0.0179 |
 
-## 10. Generated Artifacts
+The chart provides a visual summary of the features used by the fitted Random Forest model.
+
+Feature importance does not establish causal relationships between agricultural inputs and crop yield. The rankings may also change when the model is trained on different data.
+
+## 11. Generated Artifacts
+
+The project saves the following outputs:
 
 | Artifact | Description |
 |---|---|
+| `data/synthetic_crop_yield.csv` | Synthetic agricultural dataset generated in Task 1 |
 | `models/crop_yield_model.pkl` | Saved preprocessing and regression pipeline |
 | `reports/model_metrics.json` | Evaluation metrics and feature importance values |
 | `reports/feature_importance.png` | Feature importance visualization |
 
-The saved pipeline can be loaded for subsequent predictions using the same preprocessing steps applied during training.
+The saved model can be loaded for subsequent predictions using the same preprocessing steps applied during training.
 
-Only load model files from trusted sources because loading untrusted pickle-based artifacts can execute malicious code.
+**Security note:** Only load model files from trusted sources because loading untrusted pickle-based artifacts can execute malicious code.
 
-## 11. Example Prediction
+## 12. Example Prediction
 
-The saved model was tested with the following sample input:
+The saved model was tested using the following sample input:
 
 | Feature | Value |
 |---|---:|
@@ -177,36 +275,36 @@ The saved model was tested with the following sample input:
 
 This is an example prediction from the current synthetic-data model, not a verified estimate for a real farm.
 
-## 12. Limitations and Future Improvements
+## 13. Limitations and Future Improvements
 
 - Replace or supplement synthetic data with reliable real-world agricultural datasets.
 - Validate feature units and measurement ranges against the selected data source.
-- Evaluate performance across different soil types, weather conditions, and farming regions.
-- Compare the baseline model with suitable alternative regression algorithms.
-- Improve model monitoring and prediction validation.
+- Evaluate model performance across different soil types, weather conditions, and farming regions.
+- Compare the baseline model with alternative regression algorithms.
+- Improve prediction validation and model monitoring.
 - Integrate the trained pipeline into a prediction API.
-- Develop an alert system only after defining and validating appropriate agricultural thresholds.
+- Develop an alert system after defining and validating appropriate agricultural thresholds.
+- Evaluate the system using real-world agricultural data before practical deployment.
 
-## 13. Current Status
-
-The baseline machine learning pipeline has been implemented and evaluated on the synthetic crop yield dataset.
+## 14. Current Project Status
 
 | Component | Status |
 |---|---|
-| Synthetic dataset generation | Completed |
+| Task 1 — Synthetic dataset generation | Completed |
 | Dataset validation | Completed |
+| Task 2 — Feature preprocessing | Completed |
 | Random Forest baseline training | Completed |
 | Five-fold cross-validation | Completed |
-| Test-set evaluation | Completed |
+| Held-out test evaluation | Completed |
 | Feature importance visualization | Completed |
 | Model serialization | Completed |
 | Sample prediction verification | Completed |
+| Real-world agricultural validation | Future work |
+| Prediction API integration | Future work |
+| Agricultural alert system | Future work |
 
-### Next Steps
+## 15. Conclusion
 
-- Validate the model using reliable real-world agricultural data.
-- Compare the baseline model with alternative regression algorithms.
-- Integrate the trained pipeline into a prediction API.
-- Develop an alert system using appropriately validated agricultural thresholds.
+The project establishes an initial machine learning pipeline for crop yield forecasting. Task 1 generates the synthetic dataset, while Task 2 uses that dataset to preprocess features, train a Random Forest regression model, evaluate its performance, and save the resulting artifacts.
 
-**Note:** Current evaluation results are based on synthetic data and do not establish real-world agricultural accuracy.
+The current results demonstrate the workflow on synthetic data. Further validation using reliable real-world agricultural data is necessary before using the model for farming decisions or agricultural alerts.
