@@ -1,97 +1,212 @@
-# Crop Yield Forecasting and Alert System
+# Crop Yield Forecasting and Alert System for GreenField Farmers Co-op
 
-## Project Overview
+## 1. Project Overview
 
-This project is being developed for GreenField Farmers Co-op to demonstrate an end-to-end machine learning pipeline for crop yield forecasting.
+This project develops a machine learning pipeline to predict crop yield using agricultural features such as soil type, rainfall, temperature, and fertilizer usage.
 
-**Current milestone:** Task 1 — Synthetic Dataset Generation and Repository Setup.
+The project uses a synthetic dataset to develop and evaluate a baseline regression model. It demonstrates data validation, feature preprocessing, model training, cross-validation, performance evaluation, and feature importance analysis.
 
-The current dataset is synthetic and intended for development and experimentation. It does not represent actual farm measurements.
+**Current stage:** Task 2 — Feature Engineering and Baseline Model Training.
 
-## Dataset
+## 2. Objectives
 
-The generated dataset is saved at:
+- Generate and validate agricultural data.
+- Prepare numerical and categorical features for machine learning.
+- Train a Random Forest regression model.
+- Evaluate the model using cross-validation and a held-out test set.
+- Analyze feature importance.
+- Save the trained model and evaluation results for future integration.
+
+## 3. Dataset
+
+Dataset file:
 
 `data/synthetic_crop_yield.csv`
 
-It contains 1,000 synthetic field records and the following columns:
+The dataset contains 1,000 records and six columns.
 
-| Column | Description |
-|---|---|
-| `field_id` | Unique identifier for each field |
-| `soil_type` | Soil category: loamy, sandy, or clay |
-| `rainfall` | Synthetic rainfall amount in millimetres |
-| `temperature` | Synthetic temperature in degrees Celsius |
-| `fertilizer` | Synthetic fertilizer quantity in the generator's illustrative units |
-| `yield` | Simulated crop yield in tonnes per hectare |
+| Column | Description | Role |
+|---|---|---|
+| `field_id` | Unique identifier for each field | Identifier; excluded from model features |
+| `soil_type` | Soil category | Input feature |
+| `rainfall` | Rainfall measurement | Input feature |
+| `temperature` | Temperature measurement | Input feature |
+| `fertilizer` | Fertilizer measurement | Input feature |
+| `yield` | Crop yield target | Target variable |
 
-The yield values are generated using illustrative mathematical relationships involving soil type, rainfall, temperature, fertilizer, and random variation. They are not validated agricultural estimates.
+The dataset contains synthetic data generated for development and experimentation.
 
-## Technology Stack
+**Important limitation:** Synthetic data does not fully represent real agricultural conditions. Model performance on this dataset should not be interpreted as validated real-world farming performance.
+
+## 4. Technology Stack
 
 - Python
-- NumPy
 - Pandas
-- Git and GitHub
+- NumPy
+- Scikit-learn
+- Matplotlib
+- Joblib
 
-## Project Structure
+## 5. Project Structure
 
 ```text
-crop-yield-forecasting/
+crop-yield-forecasting-and-alert-system-for-greenfield-farmers/
 ├── data/
 │   └── synthetic_crop_yield.csv
 ├── notebooks/
 ├── src/
-│   └── generate_data.py
+│   ├── generate_data.py
+│   └── train_model.py
+├── models/
+│   └── crop_yield_model.pkl
+├── reports/
+│   ├── model_metrics.json
+│   └── feature_importance.png
 ├── .gitignore
-└── README.md
+├── README.md
+└── requirements.txt
 ```
 
-## Setup
+The `Task/` directory contains private task documents and should remain excluded from the public repository.
 
-Python 3.10 or newer is recommended for this project.
+## 6. Environment Setup
 
-Create and activate a virtual environment on Windows:
+Python 3.10 or another compatible Python version is recommended.
 
-```bat
+Create a virtual environment:
+
+```powershell
 python -m venv .venv
-.venv\Scripts\activate.bat
 ```
 
-Install the dependencies:
+Activate it in Windows PowerShell:
 
-```bat
-python -m pip install numpy pandas
+```powershell
+.\.venv\Scripts\Activate.ps1
 ```
 
-## Generate the Dataset
+Install the project dependencies:
 
-From the project root, run:
-
-```bat
-python src/generate_data.py
+```powershell
+python -m pip install -r requirements.txt
 ```
 
-The script uses a fixed random seed so the same configuration produces reproducible data. It validates basic dataset properties and writes the CSV file to `data/synthetic_crop_yield.csv`.
+## 7. Train the Model
 
-## Verify the Dataset
+Run the training script from the project root:
 
-Run:
-
-```bat
-python -c "import pandas as pd; df=pd.read_csv('data/synthetic_crop_yield.csv'); print(df.shape); print(df.head())"
+```powershell
+python src/train_model.py
 ```
 
-The expected shape is `(1000, 6)`.
+The script performs the following operations:
 
-## Limitations
+1. Loads and validates the dataset.
+2. Separates input features from the target variable.
+3. Applies numerical preprocessing and one-hot encoding to soil categories.
+4. Splits the dataset into training and testing sets.
+5. Evaluates the training split using five-fold cross-validation.
+6. Trains a Random Forest regression pipeline.
+7. Calculates test-set MAE and R².
+8. Generates a feature importance chart.
+9. Saves the trained pipeline and evaluation metrics.
 
-This dataset is artificially generated. Model performance on this data cannot establish real-world agricultural accuracy. Real farm data and domain validation are required before using predictions for farming decisions.
+The experiment uses an 80/20 train/test split and a fixed random seed of 42 for reproducibility.
 
-## Project Roadmap
+## 8. Model Evaluation
 
-1. Generate synthetic crop yield data and set up the repository.
-2. Perform feature engineering and train a baseline model.
-3. Build and deploy a FastAPI inference service.
-4. Create a Streamlit prediction dashboard.
-5. Implement drift monitoring and document the model.
+The current baseline model uses `RandomForestRegressor` with 200 trees.
+
+### Cross-Validation Results
+
+| Metric | Result |
+|---|---:|
+| Number of folds | 5 |
+| Mean CV MAE | 0.3549 |
+| Mean CV R² | 0.8447 |
+
+### Held-Out Test Results
+
+| Metric | Result |
+|---|---:|
+| Test MAE | 0.3413 |
+| Test R² | 0.8380 |
+
+The target values are interpreted in tonnes per hectare, as assumed by the project.
+
+**MAE (Mean Absolute Error)** measures the average absolute difference between predicted and actual yield values. Lower values indicate smaller errors on the evaluated dataset.
+
+**R² (Coefficient of Determination)** measures model performance relative to a mean-prediction baseline. Its interpretation depends on the dataset and evaluation setup.
+
+These results describe performance on the current synthetic dataset only.
+
+## 9. Feature Importance
+
+The model generates a feature importance chart at:
+
+`reports/feature_importance.png`
+
+The current model ranks rainfall, loamy soil, and temperature among its most important features.
+
+Feature importance describes how the fitted Random Forest uses features internally. It does not establish causal relationships between agricultural inputs and crop yield.
+
+## 10. Generated Artifacts
+
+| Artifact | Description |
+|---|---|
+| `models/crop_yield_model.pkl` | Saved preprocessing and regression pipeline |
+| `reports/model_metrics.json` | Evaluation metrics and feature importance values |
+| `reports/feature_importance.png` | Feature importance visualization |
+
+The saved pipeline can be loaded for subsequent predictions using the same preprocessing steps applied during training.
+
+Only load model files from trusted sources because loading untrusted pickle-based artifacts can execute malicious code.
+
+## 11. Example Prediction
+
+The saved model was tested with the following sample input:
+
+| Feature | Value |
+|---|---:|
+| Soil type | Loamy |
+| Rainfall | 500 |
+| Temperature | 25 |
+| Fertilizer | 100 |
+
+**Predicted crop yield:** 6.862 tonnes/hectare.
+
+This is an example prediction from the current synthetic-data model, not a verified estimate for a real farm.
+
+## 12. Limitations and Future Improvements
+
+- Replace or supplement synthetic data with reliable real-world agricultural datasets.
+- Validate feature units and measurement ranges against the selected data source.
+- Evaluate performance across different soil types, weather conditions, and farming regions.
+- Compare the baseline model with suitable alternative regression algorithms.
+- Improve model monitoring and prediction validation.
+- Integrate the trained pipeline into a prediction API.
+- Develop an alert system only after defining and validating appropriate agricultural thresholds.
+
+## 13. Current Status
+
+The baseline machine learning pipeline has been implemented and evaluated on the synthetic crop yield dataset.
+
+| Component | Status |
+|---|---|
+| Synthetic dataset generation | Completed |
+| Dataset validation | Completed |
+| Random Forest baseline training | Completed |
+| Five-fold cross-validation | Completed |
+| Test-set evaluation | Completed |
+| Feature importance visualization | Completed |
+| Model serialization | Completed |
+| Sample prediction verification | Completed |
+
+### Next Steps
+
+- Validate the model using reliable real-world agricultural data.
+- Compare the baseline model with alternative regression algorithms.
+- Integrate the trained pipeline into a prediction API.
+- Develop an alert system using appropriately validated agricultural thresholds.
+
+**Note:** Current evaluation results are based on synthetic data and do not establish real-world agricultural accuracy.
