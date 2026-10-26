@@ -266,29 +266,16 @@ python -m pip install -r api/requirements.txt
 
 ## Current Project Status
 
-  -----------------------------------------------------------------------
-  Task                                Status
-  ----------------------------------- -----------------------------------
-  Task 1 --- Synthetic dataset and    Completed
-  repository setup                    
+  ## Task Status
 
-  Task 2 --- Feature engineering and  Completed
-  baseline model                      
-
-  Task 3 --- FastAPI and Docker       Local/container tests completed;
-                                      Render pending
-
-  Task 4 --- Streamlit prediction     Not started
-  dashboard                           
-
-  Task 5 --- Drift monitoring and     Not started
-  model card                          
-  -----------------------------------------------------------------------
+| Task | Description | Status |
+|---|---|---|
+| Task 1 | Synthetic dataset and repository setup | Completed |
+| Task 2 | Feature engineering and baseline model | Completed |
+| Task 3 | FastAPI, Docker, and Render deployment | Completed |
 
 ## Conclusion
 
-Tasks 1 and 2 established the synthetic dataset and baseline Random
-Forest model. Task 3 now provides a FastAPI inference service and a
-Docker image, with successful local and container prediction tests.
-Render deployment is the next step. Real-world validation remains
-necessary because the current data is synthetic.
+## Conclusion
+
+Tasks 1, 2, and 3 have been completed successfully. The project includes synthetic dataset generation, feature engineering, a trained Random Forest model, model evaluation, a FastAPI inference API, Docker containerization, and successful deployment on Render. The live `POST /predict` endpoint was tested successfully and returned an HTTP 200 response with a predicted crop yield.
