@@ -1,0 +1,54 @@
+{
+  "model": "RandomForestRegressor",
+  "random_seed": 42,
+  "test_size": 0.2,
+  "training_rows": 800,
+  "test_rows": 200,
+  "cross_validation_folds": 5,
+  "cross_validation_mae": [
+    0.33198945997587487,
+    0.34029124419530177,
+    0.38485473111359153,
+    0.3601918298780214,
+    0.35737746736449305
+  ],
+  "mean_cross_validation_mae": 0.35494094650545654,
+  "cross_validation_r2": [
+    0.8542906240381427,
+    0.8440198452687895,
+    0.8271546602462486,
+    0.852243030704849,
+    0.8460290188769242
+  ],
+  "mean_cross_validation_r2": 0.8447474358269907,
+  "test_mae": 0.341259708020452,
+  "test_r2": 0.8379589233379834,
+  "target_unit": "tonnes per hectare",
+  "dataset_type": "synthetic",
+  "feature_importance": [
+    {
+      "feature": "numeric__rainfall",
+      "importance": 0.36653069944139954
+    },
+    {
+      "feature": "categorical__soil_type_loamy",
+      "importance": 0.301595441644861
+    },
+    {
+      "feature": "numeric__temperature",
+      "importance": 0.22198199974077282
+    },
+    {
+      "feature": "numeric__fertilizer",
+      "importance": 0.07467087073750389
+    },
+    {
+      "feature": "categorical__soil_type_clay",
+      "importance": 0.017895374799297377
+    },
+    {
+      "feature": "categorical__soil_type_sandy",
+      "importance": 0.017325613636165454
+    }
+  ]
+}
