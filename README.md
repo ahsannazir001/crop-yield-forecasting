@@ -321,7 +321,7 @@ Successful predictions are stored in Streamlit session state and displayed in a 
 
 The dashboard is intended for deployment on Streamlit Community Cloud.
 
-**Dashboard URL:** To be added after deployment.
+**Live Streamlit Dashboard:** https://greenfield-yield-forecast.streamlit.app/
 
 Detailed dashboard installation and usage instructions are available in `webapp/README.md`.
 
