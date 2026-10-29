@@ -1,106 +1,191 @@
 # Crop Yield Forecasting and Alert System for GreenField Farmers Co-op
 
-An end-to-end machine-learning project to generate crop-yield data,
-train a baseline regression model, and serve predictions through FastAPI
-in a Docker container. **Render deployment is still pending.**
+An end-to-end machine learning project that generates a synthetic crop-yield dataset, trains a Random Forest regression model, serves predictions through FastAPI, and provides an interactive Streamlit dashboard for crop-yield forecasting.
 
-> **Important:** The dataset is synthetic. Current metrics demonstrate
-> the workflow on generated data; they do not prove real-world
-> agricultural accuracy.
+The inference API is containerized with Docker and deployed on Render. The Streamlit dashboard provides an interface for entering agricultural field features, viewing predictions, and exploring prediction history.
 
-## Objectives
+> **Important:** The dataset is synthetic. The reported metrics demonstrate the workflow on generated data; they do not establish real-world agricultural accuracy.
 
--   Generate a synthetic crop-yield dataset.
--   Preprocess numerical and categorical features.
--   Train and evaluate a baseline model.
--   Save the fitted model pipeline.
--   Expose inference through FastAPI.
--   Package the API and model with Docker.
--   Deploy to Render, then add a dashboard, drift monitoring, and a
-    model card.
+## Project Objectives
 
-## Task 1 --- Synthetic Dataset Generation
+- Generate a synthetic crop-yield dataset.
+- Preprocess numerical and categorical features.
+- Train and evaluate a machine learning regression model.
+- Save the fitted preprocessing and model pipeline.
+- Expose predictions through FastAPI.
+- Package the API with Docker.
+- Deploy the inference API on Render.
+- Build a Streamlit dashboard for predictions.
+- Maintain a session-based history of predictions and visualize them.
+- Prepare for future drift monitoring and model-card documentation.
 
-Script: `src/generate_data.py`\
-Output: `data/synthetic_crop_yield.csv`
+## Project Links
 
-The generated dataset contains **1,000 rows and 6 columns**:
+- **GitHub Repository:** [https://github.com/ahsannazir001/crop-yield-forecasting](https://github.com/ahsannazir001/crop-yield-forecasting)
+- **Live FastAPI:** [https://crop-yield-forecasting-0j5q.onrender.com/](https://crop-yield-forecasting-0j5q.onrender.com/)
+- **API Documentation (Swagger):** [https://crop-yield-forecasting-0j5q.onrender.com/docs](https://crop-yield-forecasting-0j5q.onrender.com/docs)
+- **Prediction Endpoint:** [https://crop-yield-forecasting-0j5q.onrender.com/predict](https://crop-yield-forecasting-0j5q.onrender.com/predict)
+- **Streamlit Dashboard:** Add the public URL after deployment.
 
-  Column          Meaning                   Role
-  --------------- ------------------------- ------------------------------
-  `field_id`      Field identifier          Excluded from model features
-  `soil_type`     Soil category             Input
-  `rainfall`      Rainfall measurement      Input
-  `temperature`   Temperature measurement   Input
-  `fertilizer`    Fertilizer measurement    Input
-  `yield`         Crop yield                Target
+## Task 1 — Synthetic Dataset Generation
 
-Generate the dataset:
+**Script:** `src/generate_data.py`
 
-``` powershell
+**Output:** `data/synthetic_crop_yield.csv`
+
+The generated dataset contains **1,000 rows and 6 columns**.
+
+| Column        | Meaning                 | Role                         |
+| ------------- | ----------------------- | ---------------------------- |
+| `field_id`    | Field identifier        | Excluded from model features |
+| `soil_type`   | Soil category           | Input feature                |
+| `rainfall`    | Rainfall measurement    | Input feature                |
+| `temperature` | Temperature measurement | Input feature                |
+| `fertilizer`  | Fertilizer measurement  | Input feature                |
+| `yield`       | Crop yield              | Target variable              |
+
+### Generate the Dataset
+
+From the project root, run:
+
+```powershell
 python src/generate_data.py
 ```
 
-The CSV produced in Task 1 is used to train and evaluate the model in
-Task 2.
+The generated CSV is used to train and evaluate the machine learning model in Task 2.
 
-## Task 2 --- Feature Engineering and Baseline Model Training
+## Task 2 — Feature Engineering and Model Training
 
-Script: `src/train_model.py`
+**Training script:** `src/train_model.py`
 
-### Preprocessing and model
+### Input Features
 
--   Excluded `field_id` because it is an identifier.
--   Numerical features: `rainfall`, `temperature`, `fertilizer`.
--   Numerical preprocessing: median imputation and `StandardScaler`.
--   Categorical feature: `soil_type`, processed with most-frequent
-    imputation and one-hot encoding.
--   Estimator:
-    `RandomForestRegressor(n_estimators=200, min_samples_leaf=2, random_state=42, n_jobs=-1)`.
--   Split: 80% training and 20% test.
--   Validation: 5-fold KFold cross-validation on the training split.
--   Metrics: MAE and R².
+The model uses four predictive features:
 
-### Evaluation results
+- `soil_type`
+- `rainfall`
+- `temperature`
+- `fertilizer`
 
-  Metric                                Result
-  -------------------- -----------------------
-  Mean 5-fold CV MAE                    0.3549
-  Mean 5-fold CV R²                     0.8447
-  Test MAE               0.3413 tonnes/hectare
-  Test R²                               0.8380
+The `field_id` column is excluded because it is an identifier rather than a predictive feature.
 
-These results are from synthetic data and should not be treated as
-real-world performance estimates.
+The target variable is `yield`, representing crop yield in tonnes per hectare.
 
-### Feature importance
+### Data Preprocessing
 
-  Feature                            Importance
-  -------------------------------- ------------
-  `numeric__rainfall`                    0.3665
-  `categorical__soil_type_loamy`         0.3016
-  `numeric__temperature`                 0.2220
-  `numeric__fertilizer`                  0.0747
-  `categorical__soil_type_clay`          0.0179
+A Scikit-learn preprocessing pipeline handles numerical and categorical features separately.
 
-Feature importance reflects the model's use of features; it does not
-establish causation.
+**Numerical features:**
 
-### Saved artifacts
+- Rainfall
+- Temperature
+- Fertilizer
 
--   `models/crop_yield_model.pkl`
--   `reports/model_metrics.json`
--   `reports/feature_importance.png`
+Numerical preprocessing uses:
 
-Train the model:
+- `SimpleImputer(strategy="median")` for missing values.
+- `StandardScaler` for feature scaling.
 
-``` powershell
+**Categorical feature:**
+
+- Soil type
+
+Categorical preprocessing uses:
+
+- `SimpleImputer(strategy="most_frequent")` for missing values.
+- `OneHotEncoder` to convert soil categories into numerical features.
+
+The preprocessing steps are integrated into the model pipeline to ensure consistent transformations during training and inference.
+
+### Train-Test Split and Validation
+
+- Training data: **80% (800 records)**
+- Testing data: **20% (200 records)**
+- Validation: **5-fold K-Fold cross-validation** on the training split.
+- Evaluation metrics: Mean Absolute Error (MAE) and R².
+
+### Machine Learning Algorithm
+
+The project uses `RandomForestRegressor` with the following configuration:
+
+```python
+RandomForestRegressor(
+    n_estimators=200,
+    min_samples_leaf=2,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+The trained pipeline is saved using Joblib for reuse by the prediction API.
+
+### Model Evaluation Results
+
+| Metric             |                Result |
+| ------------------ | --------------------: |
+| Mean 5-fold CV MAE |                0.3549 |
+| Mean 5-fold CV R²  |                0.8447 |
+| Test MAE           | 0.3413 tonnes/hectare |
+| Test R²            |                0.8380 |
+
+These results were obtained using synthetic data and should not be interpreted as real-world performance estimates.
+
+### Feature Importance
+
+| Feature                        | Importance |
+| ------------------------------ | ---------: |
+| `numeric__rainfall`            |     0.3665 |
+| `categorical__soil_type_loamy` |     0.3016 |
+| `numeric__temperature`         |     0.2220 |
+| `numeric__fertilizer`          |     0.0747 |
+| `categorical__soil_type_clay`  |     0.0179 |
+
+Feature importance reflects how the trained model uses features; it does not establish causation.
+
+### Saved Artifacts
+
+- `models/crop_yield_model.pkl`
+- `reports/model_metrics.json`
+- `reports/feature_importance.png`
+
+### Train the Model
+
+```powershell
 python src/train_model.py
 ```
 
-Example input:
+## Task 3 — FastAPI Inference API and Docker
 
-``` json
+The trained machine learning pipeline is exposed through a FastAPI application.
+
+### API Endpoints
+
+| Endpoint        | Purpose                                |
+| --------------- | -------------------------------------- |
+| `GET /`         | API status message                     |
+| `GET /health`   | Health/model check                     |
+| `POST /predict` | Predict crop yield from input features |
+| `GET /docs`     | Interactive Swagger documentation      |
+
+### Live API
+
+**API Home:**
+[https://crop-yield-forecasting-0j5q.onrender.com/](https://crop-yield-forecasting-0j5q.onrender.com/)
+
+**Health Check:**
+[https://crop-yield-forecasting-0j5q.onrender.com/health](https://crop-yield-forecasting-0j5q.onrender.com/health)
+
+**Swagger Documentation:**
+[https://crop-yield-forecasting-0j5q.onrender.com/docs](https://crop-yield-forecasting-0j5q.onrender.com/docs)
+
+**Prediction Endpoint:**
+[https://crop-yield-forecasting-0j5q.onrender.com/predict](https://crop-yield-forecasting-0j5q.onrender.com/predict)
+
+### Sample Prediction Input
+
+Send the following JSON payload to `POST /predict`:
+
+```json
 {
   "soil_type": "loamy",
   "rainfall": 500,
@@ -109,104 +194,174 @@ Example input:
 }
 ```
 
-The example prediction was approximately **6.8623 tonnes/hectare**.
+The previously tested endpoint returned HTTP `200` and a predicted yield of approximately **6.8623 tonnes/hectare** for this input.
 
-## Task 3 --- FastAPI Inference API and Docker
+### Run the API Locally
 
-### API endpoints
+From the project root, activate your virtual environment and install the required dependencies.
 
-  Endpoint          Purpose
-  ----------------- -----------------------------------
-  `GET /`           API status message
-  `GET /health`     Health/model check
-  `POST /predict`   Predict yield from input features
-  `GET /docs`       Interactive Swagger documentation
+Run:
 
-### Run the API locally
-
-From the project root, with the virtual environment active and API
-dependencies installed:
-
-``` powershell
+```powershell
 python -m uvicorn api.main:app --reload
 ```
 
-Open:
+Open the following local URLs:
 
--   Home: `http://127.0.0.1:8000/`
--   Health: `http://127.0.0.1:8000/health`
--   Swagger UI: `http://127.0.0.1:8000/docs`
-
-Test `POST /predict` with:
-
-``` json
-{
-  "soil_type": "loamy",
-  "rainfall": 500,
-  "temperature": 25,
-  "fertilizer": 100
-}
-```
-
-The endpoint returned HTTP `200` and a prediction of approximately
-`6.8623` for this input.
+- Home: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+- Health: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ### Docker
 
-The root `Dockerfile` uses Python 3.10 slim, installs API dependencies,
-copies the API code and saved model, and starts Uvicorn on
-`0.0.0.0:8000`.
+The root `Dockerfile` uses Python 3.10 slim, installs the API dependencies, copies the API code and saved model, and starts Uvicorn on `0.0.0.0:8000`.
 
-The root `.dockerignore` excludes local virtual environments, Git
-metadata, private `Task/` files, training data, reports, caches, and
-environment files from the build context. The API code and model are
-intentionally not ignored.
+The root `.dockerignore` excludes local virtual environments, Git metadata, private task files, training data, reports, caches, and environment files from the Docker build context.
 
-Build the image from the project root:
+Build the Docker image:
 
-``` powershell
+```powershell
 docker build -t crop-yield-api:latest .
 ```
 
 Check the image:
 
-``` powershell
+```powershell
 docker images
 ```
 
 Run the container:
 
-``` powershell
+```powershell
 docker run --rm -p 8000:8000 crop-yield-api:latest
 ```
 
-Browse to `http://127.0.0.1:8000/` (not `0.0.0.0`, which is the server
-bind address). Test `/health` and `/docs`, then submit the prediction
-example above.
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to access the local API.
 
-### Task 3 checklist
+### Task 3 Checklist
 
--   [x] FastAPI starts locally.
--   [x] Health endpoint tested.
--   [x] Prediction endpoint tested successfully.
--   [x] Docker image `crop-yield-api:latest` built.
--   [x] Prediction tested inside the Docker container.
--   [x] `.dockerignore` added.
--   [ ] Render deployment and public URL verification.
+- [x] FastAPI application implemented.
+- [x] Health endpoint tested.
+- [x] Prediction endpoint tested successfully.
+- [x] Docker image built.
+- [x] Prediction tested inside the Docker container.
+- [x] `.dockerignore` added.
+- [x] API deployed to Render.
+- [x] Live prediction endpoint tested successfully.
+
+## Task 4 — Streamlit Dashboard for Predictions
+
+The Streamlit dashboard provides a user-friendly interface for interacting with the deployed machine learning API.
+
+### Dashboard Features
+
+- Interactive inputs for soil type, rainfall, temperature, and fertilizer.
+- Integration with the deployed FastAPI `/predict` endpoint.
+- Predicted crop yield displayed in tonnes per hectare.
+- Historical prediction bar chart.
+- Prediction history table containing input features, predicted yield, and timestamp.
+- API connection check.
+- Error handling for unsuccessful requests and connection failures.
+
+### Dashboard Technology Stack
+
+- Python
+- Streamlit
+- Requests
+- Pandas
+- FastAPI
+- Scikit-learn
+- Git and GitHub
+- Streamlit Community Cloud for deployment
+
+### Dashboard Structure
+
+```text
+webapp/
+├── app.py
+├── requirements.txt
+└── README.md
+```
+
+### Run the Dashboard Locally
+
+From the project root, run:
+
+```powershell
+python -m pip install -r webapp/requirements.txt
+python -m streamlit run webapp/app.py
+```
+
+Alternatively, navigate to the `webapp` directory and run:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+```
+
+The dashboard normally opens at:
+
+[http://localhost:8501](http://localhost:8501)
+
+### Dashboard API Configuration
+
+The dashboard uses the deployed FastAPI service by default:
+
+`https://crop-yield-forecasting-0j5q.onrender.com`
+
+The API base URL can be configured from the dashboard sidebar.
+
+### Historical Prediction Storage
+
+Successful predictions are stored in Streamlit session state and displayed in a chart and table.
+
+**Limitation:** Prediction history is session-based. It is not stored in a permanent database and may be lost when the session resets.
+
+### Streamlit Deployment
+
+The dashboard is intended for deployment on Streamlit Community Cloud.
+
+**Dashboard URL:** To be added after deployment.
+
+Detailed dashboard installation and usage instructions are available in `webapp/README.md`.
+
+### Task 4 Checklist
+
+- [x] Streamlit dashboard implemented.
+- [x] Field input form implemented.
+- [x] FastAPI prediction endpoint integrated.
+- [x] Prediction results displayed.
+- [x] Historical predictions chart implemented.
+- [x] Prediction history table implemented.
+- [x] Dashboard deployed to Streamlit Community Cloud.
+- [x] Public dashboard URL verified.
 
 ## Technology Stack
 
--   Python 3.10
--   pandas, NumPy, scikit-learn
--   Matplotlib, joblib
--   FastAPI, Uvicorn
--   Docker
--   Git and GitHub
--   Render (deployment pending)
+| Technology                | Purpose                            |
+| ------------------------- | ---------------------------------- |
+| Python 3.10               | Main programming language          |
+| Pandas                    | Data handling                      |
+| NumPy                     | Numerical operations               |
+| Scikit-learn              | Preprocessing and model training   |
+| Random Forest Regression  | Crop-yield prediction              |
+| SimpleImputer             | Missing-value handling             |
+| OneHotEncoder             | Categorical encoding               |
+| StandardScaler            | Numerical feature scaling          |
+| Matplotlib                | Feature-importance visualization   |
+| Joblib                    | Model persistence                  |
+| FastAPI                   | Prediction API                     |
+| Uvicorn                   | API server                         |
+| Requests                  | HTTP communication with the API    |
+| Streamlit                 | Interactive prediction dashboard   |
+| Docker                    | API containerization               |
+| Render                    | API hosting                        |
+| Git and GitHub            | Version control and source hosting |
+| Streamlit Community Cloud | Planned dashboard hosting          |
 
 ## Project Structure
 
-``` text
+```text
 .
 ├── api/
 │   ├── main.py
@@ -223,7 +378,11 @@ example above.
 ├── src/
 │   ├── generate_data.py
 │   └── train_model.py
-├── Task/                 # Private task documents; do not commit
+├── webapp/
+│   ├── app.py
+│   ├── requirements.txt
+│   └── README.md
+├── Task/
 ├── .dockerignore
 ├── .gitignore
 ├── Dockerfile
@@ -231,51 +390,59 @@ example above.
 └── requirements.txt
 ```
 
+The `Task/` directory contains private task documents and should not be committed if it contains confidential material.
+
 ## Environment Setup
 
-Create/activate a virtual environment if needed:
+Create and activate a virtual environment if needed:
 
-``` powershell
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install root dependencies:
+Install the root dependencies:
 
-``` powershell
+```powershell
 python -m pip install -r requirements.txt
 ```
 
-Install API dependencies if maintained separately:
+Install the API dependencies if maintained separately:
 
-``` powershell
+```powershell
 python -m pip install -r api/requirements.txt
+```
+
+Install the dashboard dependencies:
+
+```powershell
+python -m pip install -r webapp/requirements.txt
 ```
 
 ## Limitations and Future Work
 
--   Synthetic data may not represent real farm conditions.
--   Validate feature units, value ranges, and predictions with reliable
-    real agricultural data before operational use.
--   Compare the baseline against alternative models using suitable
-    validation.
--   Deploy the API to Render and test its public URL.
--   Create a Streamlit dashboard for predictions.
--   Implement drift monitoring and create a model card.
--   Add appropriate logging and production deployment configuration.
+- The dataset is synthetic and may not represent real farm conditions.
+- Predictions require validation against reliable real-world agricultural data before operational use.
+- Feature units and acceptable value ranges should be verified against agricultural domain requirements.
+- Alternative models should be evaluated using suitable validation methods.
+- Historical dashboard predictions are session-based rather than persistently stored.
+- Drift monitoring and a model card remain future tasks.
+- Production use would benefit from additional logging, monitoring, and deployment configuration.
 
 ## Current Project Status
 
-  ## Task Status
-
-| Task | Description | Status |
-|---|---|---|
-| Task 1 | Synthetic dataset and repository setup | Completed |
-| Task 2 | Feature engineering and baseline model | Completed |
-| Task 3 | FastAPI, Docker, and Render deployment | Completed |
-
-## Conclusion
+| Task   | Description                                          | Status                                    |
+| ------ | ---------------------------------------------------- | ----------------------------------------- |
+| Task 1 | Synthetic dataset generation and repository setup    | Completed                                 |
+| Task 2 | Feature engineering and baseline model training      | Completed                                 |
+| Task 3 | FastAPI inference API, Docker, and Render deployment | Completed                                 |
+| Task 4 | Streamlit dashboard for predictions                  | Dashboard implemented; deployment pending |
+| Task 5 | Drift monitoring and model card                      | Not started                               |
 
 ## Conclusion
 
-Tasks 1, 2, and 3 have been completed successfully. The project includes synthetic dataset generation, feature engineering, a trained Random Forest model, model evaluation, a FastAPI inference API, Docker containerization, and successful deployment on Render. The live `POST /predict` endpoint was tested successfully and returned an HTTP 200 response with a predicted crop yield.
+Tasks 1, 2, and 3 have been completed. The project includes synthetic dataset generation, preprocessing, Random Forest model training and evaluation, a FastAPI inference API, Docker containerization, and a successfully tested Render deployment.
+
+Task 4 adds an interactive Streamlit dashboard that accepts agricultural field inputs, calls the deployed API, displays predicted crop yield, and visualizes historical predictions during the current session. Public Streamlit deployment remains pending.
+
+The dataset is synthetic, so the model's reported metrics should not be interpreted as evidence of real-world agricultural accuracy.
